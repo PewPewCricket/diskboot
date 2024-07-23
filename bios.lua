@@ -8,12 +8,13 @@ local bootcode = ""
 local bootdisk, w, h
 
 -- Initialize Components
-for address, name in component.list() do
-  local componentType = component.proxy(address).type
-  if componentType == "drive" then
-    table.insert(disk, component.proxy(address))
+for address, ctype in component.list() do
+  if ctype == "drive" then
+    table.insert(disk, address)
   end
 end
+table.sort(disk)
+for i, a in ipairs(disk) do disk[i] = component.proxy(a) end
 
 local eeprom = component.list("eeprom")()
 local gpu = component.list("gpu")()
@@ -70,10 +71,16 @@ while true do
   local event, _, char, code, _ = computer.pullSignal()
   if event == "key_down" then
     local input = string.char(char)
-    if input ~= "0" and input == '1' or input == '2' or input == '3' or input == '4' then
-      vram_out(input, 3, 2)
-      bootdisk = tonumber(input)
-      break
+    local ok, f = pcall(tonumber, input)
+    if ok then
+      input = tonumber(input)
+      if input ~= nil and input <= #disk and input > 0 then
+        vram_out(tostring(input), 3, 2)
+        bootdisk = input
+        break
+      else
+        goto start
+      end
     else
       goto start
     end
