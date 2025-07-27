@@ -9,11 +9,16 @@ local function boot(d)
   computer.getBootAddress = function() return bootAddr end
   computer.setBootAddress = function(s) bootAddr = s end
 
-  local data
+  local data = ""
   if d.type == "filesystem" then
     local f = d.open("/init.lua", "r")
-    local size = d.size("/init.lua")
-    data = d.read(f, size)
+    while true do
+      local chunk = d.read(f, 256)
+      if not chunk then
+        break
+      end
+      data = data .. chunk
+    end
     d.close(f)
   elseif d.type == "drive" then
     error("Unmanaged Drive Support Not Yet Implemented.")
@@ -84,7 +89,7 @@ for addr in pairs(cpt.list("drive")) do
 end
 
 -- Make Boot Menu
-write(_OSVERSION)
+write(string.format("%s %d bytes free", _OSVERSION, computer.freeMemory()))
 for i, v in ipairs(disk) do
   write(string.format("%d: %s [%.5s]", i, v.getLabel() or "nil", v.address))
 end
