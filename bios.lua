@@ -1,4 +1,4 @@
-_G._OSVERSION = "Diskboot 0.2.1"
+_G._OSVERSION = "Diskboot 0.2.2"
 
 local cpt = component or require("component")
 local computer = computer or require("computer")
